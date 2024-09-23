@@ -1,0 +1,20 @@
+{
+  "name": "calenderapiwa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "fs": "^0.0.1-security",
+    "googleapis": "^144.0.0",
+    "path": "^0.12.7"
+  }
+}
