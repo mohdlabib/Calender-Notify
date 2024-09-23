@@ -23,8 +23,8 @@ Calender-Notify adalah aplikasi Node.js yang mengintegrasikan Google Calendar AP
 1. 🔄 Klon repositori:
 
    ```bash
-   git clone https://github.com/yourusername/calender-notify.git
-   cd calender-notify
+   git clone https://github.com/mohdlabib/Calender-Notify.git
+   cd Calender-Notify
    ```
 
 2. 📥 Instal dependensi:
