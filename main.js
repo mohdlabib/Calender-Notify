@@ -3,6 +3,8 @@ const { google } = require('googleapis');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron'); 
+const { log } = require('console');
 const app = express();
 const port = 3000;
 
@@ -46,7 +48,6 @@ app.get('/redirect', async (req, res) => {
     res.redirect('/'); 
 });
 
-
 async function getUserEmail(auth) {
     const people = google.people({ version: 'v1', auth });
     const res = await people.people.get({
@@ -57,8 +58,8 @@ async function getUserEmail(auth) {
     return emails && emails.length > 0 ? emails[0].value : 'No email found';
 }
 
-async function listEvents() {
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+async function listEvents(auth) {
+    const calendar = google.calendar({ version: 'v3', auth });
     const today = new Date();
     const startTime = new Date(today.setHours(0, 0, 0, 0)).toISOString();
     const endTime = new Date(today.setHours(23, 59, 59, 999)).toISOString();
@@ -75,12 +76,29 @@ async function listEvents() {
     if (events.length) {
         return events.map(event => {
             const start = event.start.dateTime || event.start.date;
-            return `${start} - ${event.summary}`;
+            return { start, summary: event.summary }; 
         });
     } else {
-        return 'No events found for today.';
+        return [];
     }
 }
+
+async function sendEventsToApi(events) {
+    const apiUrl = 'YOUR_API_ENDPOINT';
+    
+    // esekusi api
+}
+
+// Atur Perharii
+cron.schedule('0 0 * * *', async () => {
+    for (const token of tokens) {
+        oauth2Client.setCredentials(token);
+        const events = await listEvents(oauth2Client);
+        if (events.length > 0) {
+            await sendEventsToApi(events);
+        }
+    }
+});
 
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
