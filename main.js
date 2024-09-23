@@ -4,11 +4,12 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron'); 
-const { log } = require('console');
 const app = express();
 const port = 3000;
 
 const TOKEN_PATH = path.join(__dirname, '/db/auth.json');
+const EVENT_PATH = path.join(__dirname, '/db/event.json');
+const API_KEY = process.env.API_KEY; 
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'public'));
@@ -73,51 +74,64 @@ async function listEvents(auth) {
     });
 
     const events = res.data.items;
-    if (events.length) {
-        return events.map(event => {
-            const start = event.start.dateTime || event.start.date;
-            return { start, summary: event.summary }; 
-        });
-    } else {
-        return [];
-    }
+    return events.length ? events.map(event => ({
+        start: event.start.dateTime || event.start.date,
+        summary: event.summary,
+    })) : [];
 }
 
-async function sendEventsToApi(events) {
-    const apiUrl = 'YOUR_API_ENDPOINT';
-    
-    // esekusi api
+function shouldUpdateEvents() {
+    if (!fs.existsSync(EVENT_PATH)) return true;
+
+    const stats = fs.statSync(EVENT_PATH);
+    const lastModified = new Date(stats.mtime);
+    const now = new Date();
+
+    return (now - lastModified) > 24 * 60 * 60 * 1000; 
 }
 
-// Atur Perharii
-cron.schedule('0 0 * * *', async () => {
+async function updateEvents() {
     for (const token of tokens) {
         oauth2Client.setCredentials(token);
         const events = await listEvents(oauth2Client);
-        if (events.length > 0) {
-            await sendEventsToApi(events);
+
+        if (shouldUpdateEvents()) {
+            fs.writeFileSync(EVENT_PATH, JSON.stringify(events, null, 2));
+            console.log('Events updated:', events);
+        } else {
+            const existingEvents = JSON.parse(fs.readFileSync(EVENT_PATH));
+            if (JSON.stringify(events) !== JSON.stringify(existingEvents)) {
+                fs.writeFileSync(EVENT_PATH, JSON.stringify(events, null, 2));
+                console.log('Events updated due to changes:', events);
+            }
         }
+    }
+}
+
+cron.schedule('1 0 * * *', updateEvents);
+
+function verifyApiKey(req, res, next) {
+    const apiKey = req.query.api_key;
+    if (apiKey && apiKey === API_KEY) {
+        next(); 
+    } else {
+        res.status(401).json({ message: 'Unauthorized: Invalid API Key' });
+    }
+}
+
+app.get('/api', verifyApiKey, (req, res) => {
+    if (fs.existsSync(EVENT_PATH)) {
+        const events = JSON.parse(fs.readFileSync(EVENT_PATH));
+        res.json(events);
+    } else {
+        res.status(404).json({ message: 'No events found' });
     }
 });
 
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    const options = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    };
-    return date.toLocaleString('en-US', options);
-}
-
 app.get('/', (req, res) => {
     res.render('dashboard', { 
-        accounts: tokens, 
-        formatTimestamp: formatTimestamp 
+        accounts: tokens,
+        formatTimestamp: (timestamp) => new Date(timestamp).toLocaleString(),
     });
 });
 

@@ -45,6 +45,7 @@ Calender-Notify adalah aplikasi Node.js yang mengintegrasikan Google Calendar AP
 
    ```bash
    mkdir db
+   touch db/auth.json
    ```
 
 ### 🏃‍♂️ Menjalankan Aplikasi
