@@ -108,7 +108,7 @@ async function updateEvents() {
     }
 }
 
-cron.schedule('1 0 * * *', updateEvents);
+cron.schedule('0 * * * *', updateEvents);
 
 function verifyApiKey(req, res, next) {
     const apiKey = req.query.api_key;
@@ -138,3 +138,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+updateEvents()
