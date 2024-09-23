@@ -7,7 +7,7 @@ Calender-Notify adalah aplikasi Node.js yang mengintegrasikan Google Calendar AP
 - 🔑 **Autentikasi** dengan Google menggunakan OAuth2.
 - 📆 **Mengambil acara** dari Google Calendar.
 - 🖥️ **Dasbor** untuk mengelola akun yang terhubung dan tanggal kedaluwarsanya.
-- ⏰ **Memformat timestamp** menjadi format yang ramah pengguna.
+- 📲 **Notifikasi ke WhatsApp** untuk mengingatkan pengguna tentang acara yang akan datang.
 
 ## 🏁 Memulai
 
