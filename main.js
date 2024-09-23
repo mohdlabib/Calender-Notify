@@ -8,7 +8,7 @@ const { log } = require('console');
 const app = express();
 const port = 3000;
 
-const TOKEN_PATH = path.join(__dirname, '/db/token.json');
+const TOKEN_PATH = path.join(__dirname, '/db/auth.json');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'public'));
